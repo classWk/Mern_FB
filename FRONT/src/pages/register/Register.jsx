@@ -1,63 +1,64 @@
-import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import "./register.css";
-import { Link, useNavigate } from 'react-router-dom'
+import { useState } from "react";
+
 export default function Register() {
-  const[user, setUser] = useState({
-    username: '',
-    email: '',
-    password: '',
-    confirmPass:'',
+  const navigate = useNavigate();
+  const [user, setUser] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
     profilePicture: null,
-    coverPage:null,
-  })
+    coverPicture: null,
+  });
 
-  const navigate = useNavigate()
-
-  const handelInput = (e) =>{
-    const {name, value} = e.target;
-    setUser((prevState)=>({
-      ...prevState,
-      [name]:value,
-    }))
-  }
-
-  const handleFileChange = (e) =>{
-    const {name, file} = e.target;
-    setUser((prevState)=>({
-      ...prevState,
-      [name]: file[0],
-    }))
-  }
-  const handleSubmit = async (e) =>{
-    e.preventDefault();
-
-    const formData = new FormData()
-    formData.append('username', user.username);
-    formData.append('email', user.email);
-    formData.append('password', user.password);
-    formData.append('confirmPass', user.confirmPass);
-
-    if(user.profilePicture) formData.append('profilePicture', user.profilePicture);
-    if(user.coverPicture) formData.append('coverPicture', user.coverPicture);
-
-    try{
-      let response =  await fetch('http://localhost:3000/api/auth/register',{
-        method:'POST',
-      body: formData
-      })
-      if(response.ok){
-        const resposeData = await response.json()
-        alert('Registration successful')
-        setUser({username:'', email:'', password:'',confirmPass:'', profilePicture:null, coverPicture:null})
-        console.log(resposeData);
-      }else{
-        console.log('error inside respose');
-      }
-      }catch(err){
-        console.log('error',err);
-      }
-      navigate('/login')
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+    if (name === "profilePicture" || name === "coverPicture") {
+      setUser({ ...user, [name]: files[0] });
+    } else {
+      setUser({ ...user, [name]: value });
     }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Prevent form submission
+
+    const formData = new FormData();
+    formData.append("username", user.username);
+    formData.append("email", user.email);
+    formData.append("password", user.password);
+    formData.append("confirmPassword", user.confirmPassword);
+    formData.append("profilePicture", user.profilePicture);
+    formData.append("coverPicture", user.coverPicture);
+
+    try {
+      const response = await fetch("http://localhost:3000/api/auth/register", {
+        method: "POST",
+        body: formData,   
+      });
+
+      if (response.ok) {
+        setUser({
+          username: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+          profilePicture: null,
+          coverPicture: null,
+        });
+        alert("User Registered Successfully");
+        navigate("/");
+      } else {
+        alert("User Registration Failed");
+      }
+    } catch (error) {
+      console.log(error);
+      alert("User Registration Failed");
+    }
+  };
+
   return (
     <div className="login">
       <div className="loginWrapper">
@@ -70,21 +71,57 @@ export default function Register() {
         <div className="loginRight">
           <div className="loginBox">
             <form onSubmit={handleSubmit}>
-              <input type="text" name="username" value={user.username} onChange={handelInput} placeholder="Username" className="loginInput"/>
-
-              <input type="email" name="email" value={user.email} onChange={handelInput} placeholder="Email" className="loginInput"/>
-
-              <input type="password" name="password" value={user.password} onChange={handelInput} placeholder="PassWord" className="loginInput"/>
-
-              <input type="password" name="confirmPass" value={user.confirmPass} onChange={handelInput} placeholder="ConfirmPass" className="loginInput"/>
-
-              <input type="file" name="profilePicture" value={user.profilePicture} onChange={handelInput} placeholder="ProfilePicture" className="loginInput"/>
-
-              <input type="file" name="coverPicture" value={user.coverPicture} onChange={handelInput} placeholder="CoverPicture" className="loginInput"/>
-
-              <button className="loginButton" type="submit">Sign Up</button>
-              <Link to='/login'>
-              <button className="loginRegisterButton">Log into Account</button>
+              <input
+                type="text"
+                name="username"
+                placeholder="Username"
+                className="loginInput"
+                value={user.username}
+                onChange={handleChange}
+              />
+              <input
+                type="email"
+                name="email"
+                placeholder="Email"
+                className="loginInput"
+                value={user.email}
+                onChange={handleChange}
+              />
+              <input
+                type="password"
+                name="password"
+                placeholder="Password"
+                className="loginInput"
+                value={user.password}
+                onChange={handleChange}
+              />
+              <input
+                type="password"
+                name="confirmPassword"
+                placeholder="Password Again"
+                className="loginInput"
+                value={user.confirmPassword}
+                onChange={handleChange}
+              />
+              <input
+                type="file"
+                name="profilePicture"
+                onChange={handleChange}
+                className="loginInput"
+              />
+              <input
+                type="file"
+                name="coverPicture"
+                onChange={handleChange}
+                className="loginInput"
+              />
+              <button type="submit" className="loginButton">
+                Sign Up
+              </button>
+              <Link to="/login">
+                <button type="button" className="loginRegisterButton">
+                  Log into Account
+                </button>
               </Link>
             </form>
           </div>
@@ -93,5 +130,3 @@ export default function Register() {
     </div>
   );
 }
-
-
